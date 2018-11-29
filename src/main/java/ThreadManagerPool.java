@@ -9,17 +9,19 @@
  *
  *
  */
+
 import core.Process;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class ThreadManagerPool implements Runnable
 {
     final static int MAX_THREADS=100; //max threads to be queued
     final static int MAX_THREADS_IN_THREADS_POOL=10; //max threads to be submitted in the the threadpool
 
+    List<Future<?>> futures = new ArrayList<>(); //processes that are ongoing
     static ExecutorService executorService= Executors.newFixedThreadPool(MAX_THREADS_IN_THREADS_POOL);
     BlockingQueue<Process> processes = new ArrayBlockingQueue<Process>(MAX_THREADS);
 
@@ -34,9 +36,35 @@ public class ThreadManagerPool implements Runnable
     {
         return instance==null?new ThreadManagerPool():instance;
     }
+
     public void run()
     {
 
+    }
+
+    public boolean pushNewProcess(Process aInProcess)
+    {
+        if(shouldBeImmediatlyProcceed(aInProcess))
+        {
+            flushUnsedFutures(futures);
+            Future<?> future = executorService.submit(aInProcess);
+            futures.add(future);
+        }
+        return true;
+    }
+
+    private void flushUnsedFutures(List<Future<?>> futures)
+    {
+        for(Future<?> future:futures)
+        {
+            if(future.isDone() || future.isCancelled())
+                futures.remove(future);
+        }
+    }
+
+    private boolean shouldBeImmediatlyProcceed(Process aInProcess)
+    {
+        return true;
     }
 
 
