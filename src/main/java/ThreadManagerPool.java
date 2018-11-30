@@ -11,6 +11,7 @@
  */
 
 import core.Process;
+import core.ProcessState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class ThreadManagerPool implements Runnable
 
     List<Future<?>> futures = new ArrayList<>(); //processes that are ongoing
     static ExecutorService executorService= Executors.newFixedThreadPool(MAX_THREADS_IN_THREADS_POOL);
-    BlockingQueue<Process> processes = new ArrayBlockingQueue<Process>(MAX_THREADS);
+    BlockingQueue<Process> queuedProcesses = new ArrayBlockingQueue<Process>(MAX_THREADS);
 
     private static ThreadManagerPool instance;
 
@@ -50,6 +51,11 @@ public class ThreadManagerPool implements Runnable
             Future<?> future = executorService.submit(aInProcess);
             futures.add(future);
         }
+        else
+        {
+            aInProcess.setProcessState(ProcessState.QUEUED);
+            queuedProcesses.add(aInProcess);
+        }
         return true;
     }
 
@@ -64,6 +70,7 @@ public class ThreadManagerPool implements Runnable
 
     private boolean shouldBeImmediatlyProcceed(Process aInProcess)
     {
+
         return true;
     }
 

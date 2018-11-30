@@ -1,6 +1,8 @@
 package core;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 /**
  * @date 24/11/2018
@@ -22,13 +24,14 @@ public class Process implements Runnable
     protected ProcessState processState;
     protected boolean processPersistency; //peristent=true || transient=false;
     protected boolean processDependency; //dependent=true || independent=false;
-    protected ZonedDateTime startTime;
+    protected ZonedDateTime createdTime;
+    protected Optional<ZonedDateTime> startedTime= Optional.empty();
 
     public Process(int aInId)
     {
         id = aInId;
         processState= ProcessState.CREATED;
-        startTime = ZonedDateTime.now();
+        createdTime = ZonedDateTime.now();
         processPersistency=false;
         processDependency=false;
     }
@@ -37,12 +40,64 @@ public class Process implements Runnable
         id = aInId;
         processDependency = aInProcessDependency;
         processPersistency = aInProcessPersistency;
-        startTime = ZonedDateTime.now();
+        createdTime = ZonedDateTime.now();
+        processState= ProcessState.CREATED;
     }
     public void run()
     {
 
     }
 
+    public ZonedDateTime getCreatedTime()
+    {
+
+        return createdTime;
+    }
+
+
+    @Override
+    public String toString()
+    {
+
+        String str2=startedTime.isPresent()?
+                "Started at ["+ startedTime.get().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)+"]\n"
+                :"";
+        String str="Process ["+id+"]\n"+
+                "Created at ["+ createdTime.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)+"]\n"+
+                "Process Dependency:["+(processDependency?"Dependent":"Independent")+"]\n"+
+                "Process Persistency:["+(processPersistency?"Persistent":"Transient")+"]\n"+str2;
+
+        return str;
+    }
+
+    public ProcessState getProcessState()
+    {
+
+        return processState;
+    }
+
+    public int getId()
+    {
+
+        return id;
+    }
+
+    public boolean isProcessPersistency()
+    {
+
+        return processPersistency;
+    }
+
+    public boolean isProcessDependency()
+    {
+
+        return processDependency;
+    }
+
+    public void setProcessState(ProcessState processState)
+    {
+
+        this.processState = processState;
+    }
 
 }
